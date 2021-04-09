@@ -1,6 +1,8 @@
 from tkinter import Tk, StringVar, Frame,Entry,Label,Button,Menu,BooleanVar,Checkbutton,PhotoImage,END,RIGHT,LEFT,TOP,BOTTOM,CENTER,VERTICAL,Y,HORIZONTAL,X
 from tkinter import messagebox
 from tkinter import ttk
+from tkcalendar import Calendar
+import calendar
 import pandas as pd
 from Classes import AutocompleteCombobox 
 from variaveis import *
@@ -161,9 +163,94 @@ class Janela:
         #BOTAO DE INSERIR
         self.cadastroButton = Button(self.cadastroFrame, text = "Inserir Atendimento", bg=cor_principal, fg=cor_contraste, width = entrysWidth,command = self.Inserir)
         self.cadastroButton.place(x = xEntrys - 50, y = yInicialCadastro + 300)
+    
+    def Calendar(self) :
+        
+            # Create a GUI window
+        self.new_gui = Tk()
+        
+        # Set the background colour of GUI window
+        self.new_gui.config(background = cor_principal)
+        
+        #self.new_gui.resizable(width = False, height = False)
+        #Transparencia
+        self.new_gui.attributes("-alpha",0.95)
+    
+        # set the name of tkinter GUI window
+        self.new_gui.title("CALENDARIO")
+    
+        # Set the configuration of GUI window
+        self.new_gui.geometry("250x300")
+
+        def Proximo_Mes():
+            self.fetch_month += 1
+            if self.fetch_month == 13:
+                self.fetch_year += 1
+                self.fetch_month = 1
+            self.cal_content = calendar.month(self.fetch_year,self.fetch_month)
+            self.call_cal["text"] = self.cal_content
+        
+        def Volta_Mes():
+            self.fetch_month -= 1
+            if self.fetch_month == 0:
+                self.fetch_year -= 1
+                self.fetch_month = 12
+            self.cal_content = calendar.month(self.fetch_year,self.fetch_month)
+            self.call_cal["text"] = self.cal_content
+
+        # get method returns current text as string
+        self.fetch_year = 2021
+        self.fetch_month = 1
+    
+        # calendar method of calendar module return
+        # the calendar of the given year .
+        self.cal_content = calendar.month(self.fetch_year,self.fetch_month)
+
+        self.Frame_But = Frame(self.new_gui,width = 250, height = 40, bg=cor_principal,relief="raise")
+        self.Frame_But.pack(side=TOP)
+        self.Frame_Calen = Frame(self.new_gui,width = 250, height = 300, bg=cor_principal,relief="raise")
+        self.Frame_Calen.pack(side=TOP)
+    
+        self.ant_but = Button(self.Frame_But, text="Anterior", width = 10, command = Volta_Mes, bg=cor_principal, fg = cor_contraste)
+        #self.ant_but.grid(row = 1,column = 0,padx=1)
+        self.ant_but.place(x=20,y=15)
+
+        self.next_but = Button(self.Frame_But, text="Proximo", width = 10, command = Proximo_Mes, bg=cor_principal, fg = cor_contraste)
+        self.next_but.place(x=150,y=15)
+        #self.next_but.grid(row = 1, column = 0, padx=0.5)
+        
+        # Create a label for showing the content of the calender
+        self.call_cal = Label(self.Frame_Calen, text = self.cal_content, font = "Consolas 15 bold", anchor="e",justify=LEFT,bg=cor_principal, fg = cor_contraste)
+        # grid method is used for placing
+        # the widgets at respective positions
+        # in table like structure.
+        self.call_cal.place(x=10,y=20)
+        #self.call_cal.grid(row = 3, column = 0, padx = 10)
+        
+        # start the GUI
+        self.new_gui.mainloop()
+    
+    def example1():
+        def print_sel():
+            print(cal.selection_get())
+            cal.see(datetime.date(year=2016, month=2, day=5))
+
+            top = tk()
+
+            today = datetime.date.today()
+
+            mindate = datetime.date(year=2018, month=1, day=21)
+            maxdate = today + datetime.timedelta(days=5)
+            print(mindate, maxdate)
+
+            cal = Calendar(top, font="Arial 14", locale='en_US',
+                        mindate=mindate, maxdate=maxdate, bg = "grey10",fg='grey8',
+                        year=2018, month=2)
+            cal.pack(fill="both", expand=True)
+            ttk.Button(top, text="ok", command=print_sel).pack()
+    
     def Visualizar(self):
         #banco = Banco()
-
         #Abre a nova janela
         self.visualizar_janela = Tk()
 
@@ -181,13 +268,20 @@ class Janela:
         #Icone
         self.visualizar_janela.iconbitmap(default="Icons/icon.ico")
 
+        self.frame_opcoes = Frame(self.visualizar_janela, borderwidth = 2,width = largura-60, height = 100, bg=cor_principal,relief="raise")
+        self.frame_opcoes.place(x=30, y=10)
+
+        self.frame_list = Frame(self.visualizar_janela, borderwidth = 2,width = largura, height = altura-150, bg=cor_principal,relief="raise")
+        self.frame_list.place(x=30, y=150)
+
+        
         dadosCols = tuple(self.banco.dados.columns)
-        self.listagem_v = ttk.Treeview(self.visualizar_janela,columns = dadosCols, show='headings', height = 25)
+        self.listagem_v = ttk.Treeview(self.frame_list,columns = dadosCols, show='headings', height = 20)
 
         self.listagem_v.column("Id", width = 25,anchor=CENTER)
         self.listagem_v.heading("Id",text="ID",anchor=CENTER)
 
-        self.listagem_v.column("Local", width = 150,anchor=CENTER)
+        self.listagem_v.column("Local", width = 170,anchor=CENTER)
         self.listagem_v.heading("Local",text="Local",anchor=CENTER)
 
         self.listagem_v.column("Solicitante", width = 100,anchor=CENTER)
@@ -208,12 +302,13 @@ class Janela:
         self.listagem_v.column("Data", width = 100,anchor=CENTER)
         self.listagem_v.heading("Data",text="Data",anchor=CENTER)
 
-        self.listagem_v.place(x=45,y=35)
+        #self.listagem_v.place(x=45,y=150)
+        self.listagem_v.pack(side=LEFT)
 
         #BARRAS DE ROLAGEM DA VISUALIZACAO
-        self.ysb = ttk.Scrollbar(self.visualizar_janela, orient=VERTICAL, command=self.listagem_v.yview)
+        self.ysb = ttk.Scrollbar(self.frame_list, orient=VERTICAL, command=self.listagem_v.yview)
         self.listagem_v['yscroll'] = self.ysb.set
-        self.ysb.pack(side = RIGHT, fill = Y)
+        self.ysb.pack(side = LEFT, fill = Y)
 
         # TEXTOS DOS CABEÇALHO
         for c in self.dadosCols:
@@ -222,6 +317,7 @@ class Janela:
         # INSRINDO OS ITENS
         for item in self.banco.dados.values:
             self.listagem_v.insert('', 'end', values=tuple(item))
+        
         
         self.visualizar_janela.mainloop()
     def Mostrar(self,event):

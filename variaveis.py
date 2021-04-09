@@ -6,6 +6,7 @@ from tkinter import PhotoImage
 data = date.today().strftime("%d/%m/%Y")
 
 
+
 #TAMANHO DA JANELA PRINCIPAL
 largura = 1024
 altura = 600

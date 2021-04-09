@@ -2,6 +2,7 @@ from tkinter import Tk, StringVar, Frame,Entry,Label,Button,Menu,BooleanVar,Chec
 from tkinter import messagebox
 from tkinter import ttk
 from tkcalendar import Calendar
+import datetime
 import calendar
 import pandas as pd
 from Classes import AutocompleteCombobox 
@@ -16,7 +17,7 @@ class Janela:
 
         #MENU OPCOES
         opmenu = Menu(menubar,tearoff=0)
-        opmenu.add_command(label="Visualizar Atendimentos", command=self.Visualizar)
+        opmenu.add_command(label="Visualizar Atendimentos", command=self.Selecionar_Data)
         menubar.add_cascade(label="Opções", menu=opmenu)
 
         #MENUN SOBRE
@@ -230,25 +231,39 @@ class Janela:
         # start the GUI
         self.new_gui.mainloop()
     
-    def example1():
+    def Selecionar_Data(self):
         def print_sel():
             print(cal.selection_get())
             cal.see(datetime.date(year=2016, month=2, day=5))
 
-            top = tk()
+        jan_cal = Tk()
+        
+        try:
+            primeira_data = self.banco.dados["Data"].iloc[0]
+            primeira_data = primeira_data.split("/")
+            primeira_data = datetime.date(int(primeira_data[2]),int(primeira_data[1]),int(primeira_data[0]))
+        except:
+            primeira_data = datetime.date.today()
 
-            today = datetime.date.today()
+        data_ = data.split("/")
+        ultima_data = datetime.date(int(data_[2]),int(data_[1]),int(data_[0])) + datetime.timedelta(days=1)
 
-            mindate = datetime.date(year=2018, month=1, day=21)
-            maxdate = today + datetime.timedelta(days=5)
-            print(mindate, maxdate)
+        print(primeira_data, ultima_data)
 
-            cal = Calendar(top, font="Arial 14", locale='en_US',
-                        mindate=mindate, maxdate=maxdate, bg = "grey10",fg='grey8',
-                        year=2018, month=2)
-            cal.pack(fill="both", expand=True)
-            ttk.Button(top, text="ok", command=print_sel).pack()
+        cal = Calendar(jan_cal, font=fonte_Textos, locale='pt_BR',
+                    mindate=primeira_data, maxdate=ultima_data, bg = "grey10",fg='grey8',
+                    year=2018, month=2)
+        cal.pack(fill="both", expand=True)
+
+        ttk.Button(jan_cal, text="ok", command=print_sel).pack()
     
+    def to_datetime(x):
+        x = x.split("/")
+        return datetime.date(int(x[2]),int(x[1]),int(x[0]))
+         
+    def to_data(x):
+        return x.strftime("%d/%m/%Y")
+
     def Visualizar(self):
         #banco = Banco()
         #Abre a nova janela

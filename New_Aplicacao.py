@@ -2,6 +2,7 @@ from tkinter import Tk, StringVar, Frame,Entry,Label,Button,Menu,BooleanVar,Chec
 from tkinter import messagebox
 from tkinter import ttk
 from tkcalendar import Calendar
+import numpy as np
 import datetime
 import calendar
 import pandas as pd
@@ -17,7 +18,7 @@ class Janela:
 
         #MENU OPCOES
         opmenu = Menu(menubar,tearoff=0)
-        opmenu.add_command(label="Visualizar Atendimentos", command=self.Selecionar_Data)
+        opmenu.add_command(label="Visualizar Atendimentos", command=self.Visualizar)
         menubar.add_cascade(label="Opções", menu=opmenu)
 
         #MENUN SOBRE
@@ -27,6 +28,7 @@ class Janela:
 
         #INICIA BANCO DE DADOS
         self.banco = Banco()
+        self.dia = False
 
         #TITULO
         self.TopFrame = Frame(master, width = largura, height = 100, bg = cor_principal, relief = "raise" )
@@ -160,7 +162,6 @@ class Janela:
         self.chkResolv = Checkbutton(self.cadastroFrame, text='Problema Resolvido',var = self.chkValueResol,bg=cor_principal, activebackground = cor_principal, fg=cor_contraste, selectcolor = cor_principal)
         self.chkResolv.place(x = xEntrys + 100 ,y = yInicialCadastro + 260 )
 
-
         #BOTAO DE INSERIR
         self.cadastroButton = Button(self.cadastroFrame, text = "Inserir Atendimento", bg=cor_principal, fg=cor_contraste, width = entrysWidth,command = self.Inserir)
         self.cadastroButton.place(x = xEntrys - 50, y = yInicialCadastro + 300)
@@ -232,9 +233,11 @@ class Janela:
         self.new_gui.mainloop()
     
     def Selecionar_Data(self):
-        def print_sel():
-            print(cal.selection_get())
+        def Data_escolhida():
+            self.data = cal.selection_get()
             cal.see(datetime.date(year=2016, month=2, day=5))
+            for item in self.banco.dados.loc[self.banco.dados["Data"]==self.dia].values:
+                self.listagem_v.insert('', 'end', values=tuple(item))
 
         jan_cal = Tk()
         
@@ -255,9 +258,9 @@ class Janela:
                     year=2018, month=2)
         cal.pack(fill="both", expand=True)
 
-        ttk.Button(jan_cal, text="ok", command=print_sel).pack()
+        ttk.Button(jan_cal, text="ok", command=Data_escolhida).pack()
     
-    def to_datetime(x):
+    def to_datetime(x=""):
         x = x.split("/")
         return datetime.date(int(x[2]),int(x[1]),int(x[0]))
          
@@ -289,9 +292,12 @@ class Janela:
         self.frame_list = Frame(self.visualizar_janela, borderwidth = 2,width = largura, height = altura-150, bg=cor_principal,relief="raise")
         self.frame_list.place(x=30, y=150)
 
+        #self.sel_data = ttk.Button(self.frame_opcoes,text="Selecionar Data",command = self.Selecionar_Data).pack()
         
         dadosCols = tuple(self.banco.dados.columns)
         self.listagem_v = ttk.Treeview(self.frame_list,columns = dadosCols, show='headings', height = 20)
+
+        self.listagem_v.bind('<Double-1>',self.Mostrar)
 
         self.listagem_v.column("Id", width = 25,anchor=CENTER)
         self.listagem_v.heading("Id",text="ID",anchor=CENTER)
@@ -330,9 +336,12 @@ class Janela:
             self.listagem_v.heading(c, text=c.title())
 
         # INSRINDO OS ITENS
-        for item in self.banco.dados.values:
-            self.listagem_v.insert('', 'end', values=tuple(item))
-        
+        if self.dia == False:
+            for item in self.banco.dados.values:
+                self.listagem_v.insert('', 'end', values=tuple(item))
+        else:
+            for item in self.banco.dados.loc[self.banco.dados["Data"]==self.dia].values:
+                self.listagem_v.insert('', 'end', values=tuple(item))
         
         self.visualizar_janela.mainloop()
     def Mostrar(self,event):
